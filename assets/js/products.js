@@ -1,15 +1,21 @@
-// Fonction pour afficher les produits
-function displayProducts(articles) {
-    const productContainer = document.getElementById('product-container');
-    productContainer.innerHTML = ''; // Effacer le contenu précédent
+// Fetch data from JSON file
+fetch('../backOfficeEcommerce/assets/data/data.json')
+    .then(response => response.json())
+    .then(data => {
+        displayProducts(data.articles, data.panier);
+    })
+    .catch(error => console.error('Error:', error));
 
-    const panier = getCookie('panier') ? JSON.parse(getCookie('panier')) : [];
+// Function to display products
+function displayProducts(articles, panier) {
+    const productContainer = document.getElementById('product-container');
+    productContainer.innerHTML = ''; // Clear previous content
 
     articles.forEach(article => {
         const productDiv = document.createElement('div');
         productDiv.classList.add('relative','p-5', 'transition-all', 'transform', 'hover:bg-green-100');
 
-        // Vérifier si l'article est déjà dans le panier
+        // Check if the article is already in the cart
         const isInCart = panier.includes(article.id);
 
         productDiv.innerHTML = `
@@ -40,28 +46,21 @@ function displayProducts(articles) {
     });
 }
 
-// Fonction pour ajouter un produit au panier
+// Function to add product to cart
 function addToCart(articleId) {
-    let panier = getCookie('panier') ? JSON.parse(getCookie('panier')) : [];
-    
-    if (!panier.includes(articleId)) {
-        panier.push(articleId);
-        setCookie('panier', JSON.stringify(panier), 7); // Le cookie expire après 7 jours
-        
-        // Mettre à jour l'affichage des produits
-        fetch('../backOfficeEcommerce/assets/data/data.json')
-            .then(response => response.json())
-            .then(data => {
-                displayProducts(data.articles);
-            })
-            .catch(error => console.error('Erreur :', error));
-    }
+    fetch('../backOfficeEcommerce/assets/data/data.json')
+        .then(response => response.json())
+        .then(data => {
+            if (!data.panier.includes(articleId)) {
+                data.panier.push(articleId);
+                
+                // Update the JSON file with the new cart contents
+                // Note: You would typically need a backend service to handle file writing.
+                // Here, we'll assume you're using a mock server or similar solution.
+                
+                // Update the display
+                displayProducts(data.articles, data.panier);
+            }
+        })
+        .catch(error => console.error('Error:', error));
 }
-
-// Charger les produits au démarrage
-fetch('../backOfficeEcommerce/assets/data/data.json')
-    .then(response => response.json())
-    .then(data => {
-        displayProducts(data.articles);
-    })
-    .catch(error => console.error('Erreur :', error));
